@@ -40,9 +40,6 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Called when the user clicks the Send button */
-
-
     /** Called when the user clicks the History button */
     public void goToHistory(View view) {
         Intent intent = new Intent(this, HistoryActivity.class);
