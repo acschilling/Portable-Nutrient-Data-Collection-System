@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NutrientDataCollectionApp</string>
+    <string name="app_name">Nutrient Data Collection</string>
     <string name="edit_message">Enter a message</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -9,7 +9,8 @@
     <string name="button_new">New Sample</string>
     <string name="new_title">New Sample</string>
     <string name="title_activity_display_message">My Message</string>
-    <string name="title_activity_history">HistoryActivity</string>
-    <string name="title_activity_new_sample">NewSampleActivity</string>
-    <string name="title_activity_tutorial">TutorialActivity</string>
+    <string name="title_activity_history">History</string>
+    <string name="title_activity_new_sample">New Sample</string>
+    <string name="title_activity_tutorial">Tutorial</string>
+    <string name="title_activity_map">Current Location</string>
 </resources>
