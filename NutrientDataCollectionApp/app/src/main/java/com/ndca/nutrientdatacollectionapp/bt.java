@@ -1,17 +1,11 @@
 package com.ndca.nutrientdatacollectionapp;
 
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -37,23 +31,16 @@ import java.util.UUID;
  *      Google http://developer.android.com/guide/topics/connectivity/bluetooth-le.html
  */
 
-@TargetApi(21)
-public class bt{
-    private static final String TAG = "May1633";
+public class bt extends HomeActivity{
+    private static final String TAG = "Portable Nutrient Data Collection System";
     private BluetoothAdapter mBluetoothAdapter;
     private String deviceName = "PNDCS";
     private BluetoothGatt mConnectedGatt;
-    private BluetoothGattCharacteristic characteristic;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanSettings settings;
     private List<ScanFilter> filters;
 
     private Handler mhandler;
-
-    private Context mContext;
-    public bt(Context mContext) {
-        this.mContext = mContext;
-    }
 
     //onCreate
     public void initialize()
@@ -63,7 +50,7 @@ public class bt{
 
        // Initializes Bluetooth adapter.
        final BluetoothManager bluetoothManager =
-               (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+               (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
        mBluetoothAdapter = bluetoothManager.getAdapter();
        mhandler = new Handler();
    }
@@ -75,24 +62,25 @@ public class bt{
         // displays a dialog requesting user permission to enable Bluetooth.
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mContext.startActivity(enableBtIntent);
-            ((Activity)mContext).finish();
+            startActivity(enableBtIntent);
+            finish();
             return;
         }
 
         // Use this check to determine whether BLE is supported on the device. Then
         // you can selectively disable BLE-related features.
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(mContext, "BLE not supported", Toast.LENGTH_SHORT).show();
-            ((Activity)mContext).finish();
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, "BLE not supported", Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
 
         //set up scanner for PNDCS only
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_BALANCED).build();
+        settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build();
 
-        ScanFilter filter1 = new ScanFilter.Builder().setDeviceName(deviceName).setDeviceAddress("F8:F0:05:F3:4A:A3").build();
+        //setUUID also for specific device
+        ScanFilter filter1 = new ScanFilter.Builder().setDeviceName(deviceName).build();
         filters = new ArrayList<ScanFilter>();
         filters.add(filter1);
 
@@ -111,12 +99,12 @@ public class bt{
    }
 
     //connect to found bluetooth device
-    private void btConnect(BluetoothDevice device)
+    public void btConnect(BluetoothDevice device)
     {
         if(mConnectedGatt == null)
         {
             Log.i(TAG, "Connecting to " + device.getName());
-            mConnectedGatt = device.connectGatt(mContext,false,mGattCallback); //change boolean for connecting automatically to device when found
+            mConnectedGatt = device.connectGatt(this,false,mGattCallback); //change boolean for connecting automatically to device when found
             mhandler.removeCallbacks(mStopRunnable);
             mhandler.removeCallbacks(mStartRunnable);
         }
@@ -144,7 +132,7 @@ public class bt{
     }
 
     //stop scanning for devices
-    public void stopScan()
+    private void stopScan()
     {
         mBluetoothLeScanner.stopScan(mScanCallBack);
     }
@@ -176,73 +164,15 @@ public class bt{
     };
 
 
-    //callbacks for connection state change, services found, and reading characteristics
+    //state machine for how the device communicates with device
+    //PNDCS protocol
+    //TODO
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.i("onConnectionStateChange", "Status: " + status);
-            switch (newState) {
-                case BluetoothProfile.STATE_CONNECTED:
-                    Log.i("gattCallback", "STATE_CONNECTED");
-                    ((Activity)mContext).runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(mContext, "Connected to " + deviceName, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                    gatt.discoverServices();
-                    break;
-                case BluetoothProfile.STATE_DISCONNECTED:
-                    Log.e("gattCallback", "STATE_DISCONNECTED");
-                    ((Activity)mContext).runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(mContext, "Disconnected from " + deviceName, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    break;
-                default:
-                    Log.e("gattCallback", "STATE_OTHER");
-            }
-
-        }
-
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            List<BluetoothGattService> services = gatt.getServices();
-            Log.i("onServicesDiscovered", services.toString());
-            gatt.readCharacteristic(services.get(1).getCharacteristics().get
-                    (0));
-
-            //TODO find service that has the spectrum data and set characteristic for notification
-            characteristic = services.get(1).getCharacteristics().get(0);           //dummy value right now
-            mConnectedGatt.setCharacteristicNotification(characteristic, true);
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    characteristic.getUuid());                                      //need some characteristic uuid
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mConnectedGatt.writeDescriptor(descriptor);
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic
-                                                 characteristic, int status) {
-            Log.i("onCharacteristicRead", characteristic.toString());
-            gatt.disconnect();
-        }
-
-        @Override
-        // Characteristic notification
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
-            //TODO do something with the characteristic data received
+            super.onConnectionStateChange(gatt, status, newState);
         }
     };
-
-    //TODO data parsing
-    private void broadcastUpdate(final String action,
-                                 final BluetoothGattCharacteristic characteristic) {
-
-    }
 
 
 
