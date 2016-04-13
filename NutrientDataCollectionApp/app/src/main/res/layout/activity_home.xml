@@ -12,20 +12,20 @@ android:layout_height="fill_parent"
     <TableRow
         android:layout_weight="1"
         android:gravity="center">
-        <Button android:text="History" android:layout_width="fill_parent" android:layout_height="fill_parent"
-            android:onClick="goToHistory"/>
+        <Button android:text="History" android:textSize="30dp" android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:onClick="goToHistory" android:scaleY=".75"/>
     </TableRow>
     <TableRow
         android:layout_weight="1"
         android:gravity="center">
-        <Button android:text="New Sample" android:layout_width="fill_parent" android:layout_height="fill_parent"
-            android:onClick="goToNewSample"/>
+        <Button android:text="New Sample" android:textSize="30dp" android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:onClick="goToNewSample" android:scaleY=".75"/>
     </TableRow>
     <TableRow
         android:layout_weight="1"
         android:gravity="center">
-        <Button android:text="Tutorial" android:layout_width="fill_parent" android:layout_height="fill_parent"
-            android:onClick="goToTutorial"/>
+        <Button android:text="Tutorial" android:textSize="30dp" android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:onClick="goToTutorial" android:scaleY=".75"/>
     </TableRow>
 </TableLayout>
 </LinearLayout>

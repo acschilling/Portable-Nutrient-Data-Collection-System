@@ -12,6 +12,9 @@
         android:text="Start"
         android:background="@drawable/circle"
         android:layout_centerHorizontal="true"
+        android:scaleY="4"
+        android:scaleX="2"
+        android:layout_marginTop="125dp"
         />
 
 </RelativeLayout>

@@ -1,12 +1,11 @@
 package com.ndca.nutrientdatacollectionapp;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -40,21 +39,28 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Called when the user clicks the History button */
+    /**
+     * Called when the user clicks the History button
+     */
     public void goToHistory(View view) {
         Intent intent = new Intent(this, HistoryActivity.class);
         startActivity(intent);
     }
 
-    /** Called when the user clicks the New Sample button */
+    /**
+     * Called when the user clicks the New Sample button
+     */
     public void goToNewSample(View view) {
         Intent intent = new Intent(this, NewSampleActivity.class);
         startActivity(intent);
     }
 
-    /** Called when the user clicks the New Sample button */
+    /**
+     * Called when the user clicks the New Sample button
+     */
     public void goToTutorial(View view) {
         Intent intent = new Intent(this, TutorialActivity.class);
         startActivity(intent);
     }
+
 }
