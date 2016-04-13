@@ -9,6 +9,9 @@
 
     <!-- Declaration that this app is usable on phones with Bluetooth Low Energy. -->
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
+
+    <!-- min android SDK version is 21 to support ble -->
+    <uses-sdk android:minSdkVersion="21"/>
 	
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
