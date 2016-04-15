@@ -3,6 +3,7 @@ package com.ndca.nutrientdatacollectionapp;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -18,6 +19,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -49,6 +51,7 @@ public class bt{
     private List<ScanFilter> filters;
 
     private Handler mhandler;
+    private boolean isOn = false;
 
     private Context mContext;
     public bt(Context mContext) {
@@ -109,6 +112,11 @@ public class bt{
            mConnectedGatt = null;
        }
    }
+
+    public boolean isBTOn()
+    {
+        return isOn;
+    }
 
     //connect to found bluetooth device
     private void btConnect(BluetoothDevice device)
@@ -184,6 +192,7 @@ public class bt{
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.i("gattCallback", "STATE_CONNECTED");
+                    isOn = true;
                     ((Activity)mContext).runOnUiThread(new Runnable() {
                         public void run() {
                             Toast.makeText(mContext, "Connected to " + deviceName, Toast.LENGTH_SHORT).show();
@@ -194,6 +203,7 @@ public class bt{
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e("gattCallback", "STATE_DISCONNECTED");
+                    isOn = false;
                     ((Activity)mContext).runOnUiThread(new Runnable() {
                         public void run() {
                             Toast.makeText(mContext, "Disconnected from " + deviceName, Toast.LENGTH_SHORT).show();
