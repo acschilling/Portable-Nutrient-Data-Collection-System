@@ -10,32 +10,12 @@ import android.view.View;
 public class HomeActivity extends AppCompatActivity {
 
     public final static String EXTRA_MESSAGE = "com.NDCA.nutrientdatacollectionapp.MESSAGE";
-    bt bluetooth = new bt(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        bluetooth.initialize();
     }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-        bluetooth.btOn();
-    }
-
-    @Override
-    protected void onPause(){
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop(){
-        super.onStop();
-       bluetooth.btOff();
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
