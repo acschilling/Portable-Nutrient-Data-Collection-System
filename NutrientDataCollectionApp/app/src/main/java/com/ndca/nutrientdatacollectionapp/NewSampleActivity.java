@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +30,7 @@ public class NewSampleActivity extends AppCompatActivity {
         {
             bluetooth.btOn();
         }
+
     }
 
     @Override
@@ -56,5 +58,13 @@ public class NewSampleActivity extends AppCompatActivity {
     public void goToHistory(Activity activity) {
             Intent intent = new Intent(activity, HomeActivity.class);
             startActivity(intent);
+    }
+
+    /**
+     * Called by button to start system
+     */
+    public void startSystem(View view){
+        bluetooth.notifyConnectedDevices();
+        Log.i("button_pressed", "System started");
     }
 }

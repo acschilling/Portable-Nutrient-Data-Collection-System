@@ -15,6 +15,7 @@
         android:scaleY="4"
         android:scaleX="2"
         android:layout_marginTop="125dp"
+        android:onClick="startSystem"
         />
 
 </RelativeLayout>
