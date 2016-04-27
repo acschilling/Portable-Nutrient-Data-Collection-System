@@ -13,4 +13,6 @@
     <string name="title_activity_new_sample">New Sample</string>
     <string name="title_activity_tutorial">Tutorial</string>
     <string name="title_activity_map">Current Location</string>
+    <string name="title_activity_sample"></string>
+    <string name="title_activity_row">RowActivity</string>
 </resources>
