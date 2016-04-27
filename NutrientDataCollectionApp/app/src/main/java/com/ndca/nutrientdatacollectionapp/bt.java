@@ -10,6 +10,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattServer;
+import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -23,9 +25,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +41,7 @@ import java.util.UUID;
  *      Dave Smith https://github.com/devunwired/accessory-samples/blob/master/BluetoothGatt/src/com/example/bluetoothgatt/MainActivity.java
  *      truiton http://www.truiton.com/2015/04/android-bluetooth-low-energy-ble-example/
  *      Google http://developer.android.com/guide/topics/connectivity/bluetooth-le.html
+ *      devunwired https://github.com/devunwired/accessory-samples/blob/master/BluetoothGattPeripheral/src/main/java/com/example/android/bluetoothgattperipheral/DeviceProfile.java
  */
 
 @TargetApi(21)
@@ -45,6 +50,7 @@ public class bt{
     private BluetoothAdapter mBluetoothAdapter;
     private String deviceName = "PNDCS";
     private BluetoothGatt mConnectedGatt;
+    private BluetoothGattServer mGattServer;
     private BluetoothGattCharacteristic characteristic;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanSettings settings;
@@ -69,6 +75,7 @@ public class bt{
                (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
        mBluetoothAdapter = bluetoothManager.getAdapter();
        mhandler = new Handler();
+       mGattServer = bluetoothManager.openGattServer(mContext, mGattServerCallback);
    }
 
     //onResume
@@ -91,17 +98,53 @@ public class bt{
             return;
         }
 
+        initServer();
+
         //set up scanner for PNDCS only
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_BALANCED).build();
 
-        ScanFilter filter1 = new ScanFilter.Builder().setDeviceName(deviceName).setDeviceAddress("F8:F0:05:F3:4A:A3").build();
+        ScanFilter filter1 = new ScanFilter.Builder().setDeviceAddress("F8:F0:05:F3:4A:A3").build();
         filters = new ArrayList<ScanFilter>();
         filters.add(filter1);
 
         //start scanning
         startScan();
     }
+
+    public void initServer() {
+        BluetoothGattService service =new BluetoothGattService(DeviceProfile.SERVICE_UUID,
+                BluetoothGattService.SERVICE_TYPE_SECONDARY);
+
+        BluetoothGattCharacteristic startCharacteristic =
+                new BluetoothGattCharacteristic(DeviceProfile.CHARACTERISTIC_START_UUID,
+                        //Read-only characteristic, supports notifications
+                        BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                        BluetoothGattCharacteristic.PERMISSION_READ);
+
+        if(service.addCharacteristic(startCharacteristic));
+        {
+            Log.i("char_add","Characteristic added");
+        }
+
+        mGattServer.addService(service);
+    }
+
+    private void shutdownServer() {
+        mhandler.removeCallbacks(mNotifyRunnable);
+
+        if (mGattServer == null) return;
+
+        mGattServer.close();
+    }
+
+    private Runnable mNotifyRunnable = new Runnable() {
+        @Override
+        public void run() {
+            notifyConnectedDevices();
+            mhandler.postDelayed(this, 2000);
+        }
+    };
 
     //onStop
    public void btOff()
@@ -127,6 +170,10 @@ public class bt{
             mConnectedGatt = device.connectGatt(mContext,false,mGattCallback); //change boolean for connecting automatically to device when found
             mhandler.removeCallbacks(mStopRunnable);
             mhandler.removeCallbacks(mStartRunnable);
+        }
+        else
+        {
+            mConnectedGatt.connect();
         }
     }
 
@@ -184,6 +231,7 @@ public class bt{
     };
 
 
+    //Bluetooth Central, Client
     //callbacks for connection state change, services found, and reading characteristics
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -193,13 +241,12 @@ public class bt{
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.i("gattCallback", "STATE_CONNECTED");
                     isOn = true;
-                    ((Activity)mContext).runOnUiThread(new Runnable() {
+                    gatt.discoverServices();
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
                         public void run() {
                             Toast.makeText(mContext, "Connected to " + deviceName, Toast.LENGTH_SHORT).show();
                         }
                     });
-
-                    gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e("gattCallback", "STATE_DISCONNECTED");
@@ -218,13 +265,10 @@ public class bt{
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            List<BluetoothGattService> services = gatt.getServices();
-            Log.i("onServicesDiscovered", services.toString());
-            gatt.readCharacteristic(services.get(1).getCharacteristics().get
-                    (0));
+            BluetoothGattService service = mConnectedGatt.getService(DeviceProfile.PNDCS_SERVICE_UUID);
+            Log.i("onServicesDiscovered", service.toString());
+            gatt.readCharacteristic(service.getCharacteristic(DeviceProfile.CHARACTERISTIC_DATA_UUID));
 
-            //TODO find service that has the spectrum data and set characteristic for notification
-            characteristic = services.get(1).getCharacteristics().get(0);           //dummy value right now
             mConnectedGatt.setCharacteristicNotification(characteristic, true);
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
                     characteristic.getUuid());                                      //need some characteristic uuid
@@ -245,23 +289,40 @@ public class bt{
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             //TODO do something with the characteristic data received
+            Log.i("notify", characteristic.toString());
+        }
+
+    };
+
+
+    //Bluetooth, Server
+    /*
+     * Callback for Server
+     */
+    private BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+            super.onConnectionStateChange(device, status, newState);
+            Log.i(TAG, "onConnectionStateChange "
+                    +DeviceProfile.getStatusDescription(status)+" "
+                    +DeviceProfile.getStateDescription(newState));
+
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.i("server callback","Device connected");
+
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.i("server callback","Device disconnected");
+            }
         }
     };
 
-    //TODO data parsing
-    private void broadcastUpdate(final String action,
-                                 final BluetoothGattCharacteristic characteristic) {
-
+    //use to notify PNDCS device to start
+    public void notifyConnectedDevices() {
+            BluetoothGattCharacteristic readCharacteristic = mGattServer.getService(DeviceProfile.SERVICE_UUID)
+                    .getCharacteristic(DeviceProfile.CHARACTERISTIC_START_UUID);
+            readCharacteristic.setValue(DeviceProfile.bytesFromInt(1));
+            mGattServer.notifyCharacteristicChanged(mConnectedGatt.getDevice(), readCharacteristic, false);
+        Log.i("notify", "Characteristic notified");
     }
 
-
-
-
-
-
-
-
-
-
-
-    }
+}

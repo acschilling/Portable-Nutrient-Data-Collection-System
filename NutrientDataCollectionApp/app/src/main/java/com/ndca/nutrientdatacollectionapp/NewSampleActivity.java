@@ -3,7 +3,11 @@ package com.ndca.nutrientdatacollectionapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.support.v7.app.AppCompatActivity;
+=======
+import android.util.Log;
+>>>>>>> refs/remotes/origin/master
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +30,7 @@ public class NewSampleActivity extends AppCompatActivity {
         {
             bluetooth.btOn();
         }
+
     }
 
     @Override
@@ -53,5 +58,13 @@ public class NewSampleActivity extends AppCompatActivity {
     public void goToSample(View view) {
         Intent intent = new Intent(this, SampleActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Called by button to start system
+     */
+    public void startSystem(View view){
+        bluetooth.notifyConnectedDevices();
+        Log.i("button_pressed", "System started");
     }
 }
