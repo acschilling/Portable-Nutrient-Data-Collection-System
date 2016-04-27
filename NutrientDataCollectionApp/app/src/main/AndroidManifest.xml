@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ndca.nutrientdatacollectionapp" >
-	
+    package="com.ndca.nutrientdatacollectionapp" > <!-- min android SDK version is 21 to support ble -->
+    <uses-sdk android:minSdkVersion="21" />
+
     <!-- Needed permissions for bluetooth -->
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Declaration that this app is usable on phones with Bluetooth Low Energy. -->
-    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
 
-    <!-- min android SDK version is 21 to support ble -->
-    <uses-sdk android:minSdkVersion="21"/>
-	
     <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -69,6 +73,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ndca.nutrientdatacollectionapp.HistoryActivity" />
         </activity>
+        <activity
+            android:name=".SampleActivity"
+            android:label="@string/title_activity_sample"
+            android:parentActivityName=".NewSampleActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ndca.nutrientdatacollectionapp.NewSampleActivity" />
+        </activity>
+        <activity
+            android:name=".RowActivity"
+            android:label="@string/title_activity_row" >
+        </activity>
     </application>
-	
+
 </manifest>

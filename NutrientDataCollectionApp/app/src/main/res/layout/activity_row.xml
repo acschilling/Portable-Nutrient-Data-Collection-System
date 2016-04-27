@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context="com.ndca.nutrientdatacollectionapp.RowActivity">
+
+
+    <TextView
+        android:layout_marginTop="25dp"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/sample_name"
+        android:text="Sample Name"
+        android:gravity="center"
+        android:textColor="#000">
+
+    </TextView>
+
+    <TextView
+        android:layout_marginTop="25dp"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/sample_id"
+        android:text="Sample ID"
+        android:gravity="center"
+        android:textColor="#000">
+
+    </TextView>
+
+    <TextView
+        android:layout_marginTop="25dp"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/sample_location"
+        android:text="Sample Location"
+        android:gravity="center"
+        android:textColor="#000">
+
+    </TextView>
+
+    <TextView
+        android:layout_marginTop="25dp"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/more"
+        android:text="More"
+        android:gravity="center"
+        android:textColor="#008">
+
+    </TextView>
+
+</LinearLayout>
